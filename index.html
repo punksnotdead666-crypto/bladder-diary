@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>頻尿日記</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .date-display {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 16px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .amount-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .amount-btn {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .amount-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .amount-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .add-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .add-btn:active {
+            transform: scale(0.98);
+        }
+
+        .record-item {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .record-info {
+            flex: 1;
+        }
+
+        .record-time {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .record-details {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .summary-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .custom-amount {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .custom-amount input {
+            flex: 1;
+        }
+
+        .custom-amount button {
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💧 頻尿日記</h1>
+        <div class="date-display" id="dateDisplay"></div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('intake')">水分摂取</button>
+            <button class="tab" onclick="switchTab('urination')">排尿</button>
+            <button class="tab" onclick="switchTab('history')">記録</button>
+        </div>
+
+        <!-- 水分摂取タブ -->
+        <div id="intake" class="tab-content active">
+            <div class="input-group">
+                <label>飲み物の種類</label>
+                <select id="drinkType">
+                    <option value="水">水</option>
+                    <option value="お茶">お茶</option>
+                    <option value="コーヒー">コーヒー</option>
+                    <option value="紅茶">紅茶</option>
+                    <option value="ジュース">ジュース</option>
+                    <option value="牛乳">牛乳</option>
+                    <option value="スポーツドリンク">スポーツドリンク</option>
+                    <option value="その他">その他</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>量（ml）</label>
+                <div class="amount-selector">
+                    <button class="amount-btn" onclick="selectAmount(100)">100ml</button>
+                    <button class="amount-btn" onclick="selectAmount(150)">150ml</button>
+                    <button class="amount-btn" onclick="selectAmount(200)">200ml</button>
+                    <button class="amount-btn" onclick="selectAmount(250)">250ml</button>
+                    <button class="amount-btn" onclick="selectAmount(300)">300ml</button>
+                    <button class="amount-btn" onclick="selectAmount(500)">500ml</button>
+                </div>
+                <div class="custom-amount">
+                    <input type="number" id="customAmount" placeholder="カスタム量を入力">
+                    <button onclick="selectCustomAmount()">設定</button>
+                </div>
+            </div>
+
+            <button class="add-btn" onclick="addIntake()">💧 水分摂取を記録</button>
+        </div>
+
+        <!-- 排尿タブ -->
+        <div id="urination" class="tab-content">
+            <div class="input-group">
+                <label>量</label>
+                <div class="amount-selector">
+                    <button class="amount-btn" onclick="selectUrinationAmount('チョロチョロ')">チョロチョロ</button>
+                    <button class="amount-btn" onclick="selectUrinationAmount('普通')">普通</button>
+                    <button class="amount-btn" onclick="selectUrinationAmount('大量')">大量</button>
+                </div>
+                <div class="custom-amount">
+                    <input type="text" id="customUrinationAmount" placeholder="その他を入力">
+                    <button onclick="selectCustomUrinationAmount()">設定</button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>メモ（任意）</label>
+                <input type="text" id="urinationNote" placeholder="例：夜間、我慢できなかった等">
+            </div>
+
+            <button class="add-btn" onclick="addUrination()">🚽 排尿を記録</button>
+        </div>
+
+        <!-- 記録タブ -->
+        <div id="history" class="tab-content">
+            <div class="summary">
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-value" id="totalIntake">0</div>
+                        <div class="summary-label">総水分量（ml）</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="totalUrination">0</div>
+                        <div class="summary-label">排尿回数</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>📊 Googleスプレッドシート自動保存設定</label>
+                <input type="text" id="sheetUrl" placeholder="Apps ScriptのウェブアプリURLを入力" style="margin-bottom: 10px;">
+                <button class="add-btn" onclick="saveSheetUrl()" style="margin-top: 0; padding: 12px;">設定を保存</button>
+                <div style="font-size: 12px; color: #666; margin-top: 10px; line-height: 1.6;">
+                    💡 毎日24時に自動的にスプレッドシートへ保存されます<br>
+                    ⚙️ <a href="#" onclick="showSheetSetup(); return false;" style="color: #667eea;">設定手順を見る</a> | 
+                    <a href="#" onclick="testConnection(); return false;" style="color: #667eea;">接続テスト</a> |
+                    <a href="#" onclick="manualExport(); return false;" style="color: #667eea;">今すぐ保存</a>
+                </div>
+            </div>
+
+            <div id="recordsList"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedAmount = null;
+        let selectedUrinationAmount = null;
+        let records = JSON.parse(localStorage.getItem('bladderDiary')) || [];
+        let sheetUrl = localStorage.getItem('sheetUrl') || '';
+
+        // 日付表示
+        function updateDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('dateDisplay').textContent = now.toLocaleDateString('ja-JP', options);
+        }
+
+        // タブ切り替え
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+
+            if (tabName === 'history') {
+                updateHistory();
+                document.getElementById('sheetUrl').value = sheetUrl;
+            }
+        }
+
+        // 水分量選択
+        function selectAmount(amount) {
+            selectedAmount = amount;
+            document.querySelectorAll('#intake .amount-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        function selectCustomAmount() {
+            const customAmount = parseInt(document.getElementById('customAmount').value);
+            if (customAmount > 0) {
+                selectedAmount = customAmount;
+                document.querySelectorAll('#intake .amount-btn').forEach(btn => btn.classList.remove('selected'));
+            }
+        }
+
+        // 排尿量選択
+        function selectUrinationAmount(amount) {
+            selectedUrinationAmount = amount;
+            document.querySelectorAll('#urination .amount-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        function selectCustomUrinationAmount() {
+            const customAmount = document.getElementById('customUrinationAmount').value.trim();
+            if (customAmount) {
+                selectedUrinationAmount = customAmount;
+                document.querySelectorAll('#urination .amount-btn').forEach(btn => btn.classList.remove('selected'));
+            }
+        }
+
+        // 水分摂取記録
+        function addIntake() {
+            const drinkType = document.getElementById('drinkType').value;
+            
+            if (!selectedAmount) {
+                alert('量を選択してください');
+                return;
+            }
+
+            const record = {
+                type: 'intake',
+                timestamp: new Date().toISOString(),
+                drinkType: drinkType,
+                amount: selectedAmount
+            };
+
+            records.push(record);
+            saveRecords();
+            
+            // リセット
+            selectedAmount = null;
+            document.querySelectorAll('#intake .amount-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('customAmount').value = '';
+            
+            alert('✅ 記録しました！');
+        }
+
+        // 排尿記録
+        function addUrination() {
+            if (!selectedUrinationAmount) {
+                alert('量を選択してください');
+                return;
+            }
+
+            const note = document.getElementById('urinationNote').value;
+
+            const record = {
+                type: 'urination',
+                timestamp: new Date().toISOString(),
+                amount: selectedUrinationAmount,
+                note: note
+            };
+
+            records.push(record);
+            saveRecords();
+            
+            // リセット
+            selectedUrinationAmount = null;
+            document.querySelectorAll('#urination .amount-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('customUrinationAmount').value = '';
+            document.getElementById('urinationNote').value = '';
+            
+            alert('✅ 記録しました！');
+        }
+
+        // 記録保存
+        function saveRecords() {
+            localStorage.setItem('bladderDiary', JSON.stringify(records));
+        }
+
+        // 記録削除
+        function deleteRecord(index) {
+            if (confirm('この記録を削除しますか？')) {
+                records.splice(index, 1);
+                saveRecords();
+                updateHistory();
+            }
+        }
+
+        // 履歴更新
+        function updateHistory() {
+            const today = new Date().toDateString();
+            const todayRecords = records.filter(r => 
+                new Date(r.timestamp).toDateString() === today
+            );
+
+            // 統計計算
+            const totalIntake = todayRecords
+                .filter(r => r.type === 'intake')
+                .reduce((sum, r) => sum + r.amount, 0);
+            
+            const totalUrination = todayRecords.filter(r => r.type === 'urination').length;
+
+            document.getElementById('totalIntake').textContent = totalIntake;
+            document.getElementById('totalUrination').textContent = totalUrination;
+
+            // 記録一覧
+            const recordsList = document.getElementById('recordsList');
+            
+            if (todayRecords.length === 0) {
+                recordsList.innerHTML = '<div class="empty-state">まだ記録がありません</div>';
+                return;
+            }
+
+            // 時系列で降順ソート
+            todayRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            recordsList.innerHTML = todayRecords.map((record, index) => {
+                const time = new Date(record.timestamp).toLocaleTimeString('ja-JP', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+
+                if (record.type === 'intake') {
+                    return `
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-time">💧 ${time}</div>
+                                <div class="record-details">${record.drinkType} - ${record.amount}ml</div>
+                            </div>
+                            <button class="delete-btn" onclick="deleteRecord(${records.indexOf(record)})">削除</button>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-time">🚽 ${time}</div>
+                                <div class="record-details">${record.amount}${record.note ? ' - ' + record.note : ''}</div>
+                            </div>
+                            <button class="delete-btn" onclick="deleteRecord(${records.indexOf(record)})">削除</button>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+
+        // Google Sheets URL保存
+        function saveSheetUrl() {
+            const url = document.getElementById('sheetUrl').value.trim();
+            if (!url) {
+                alert('Apps ScriptのウェブアプリURLを入力してください');
+                return;
+            }
+            
+            // Apps Script URLかチェック
+            if (!url.includes('script.google.com/macros/s/') || !url.endsWith('/exec')) {
+                alert('有効なApps ScriptのウェブアプリURLを入力してください\n\n例：https://script.google.com/macros/s/.../exec');
+                return;
+            }
+            
+            sheetUrl = url;
+            localStorage.setItem('sheetUrl', sheetUrl);
+            alert('✅ 設定を保存しました！毎日24時に自動保存されます。');
+        }
+
+        // スプレッドシート設定手順を表示
+        function showSheetSetup() {
+            const instructions = `📊 Googleスプレッドシート自動保存設定手順
+
+【ステップ1】Googleスプレッドシートを作成
+1. 新しいGoogleスプレッドシートを作成
+2. 1行目に以下の見出しを入力：
+   A1: 日付
+   B1: 時刻
+   C1: 種類
+   D1: 内容
+   E1: 量(ml)
+   F1: メモ
+
+【ステップ2】Apps Scriptを設定
+1. 「拡張機能」→「Apps Script」を開く
+2. 既存のコードを全て削除
+3. 以下のコードを貼り付け：
+
+function doPost(e) {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const data = JSON.parse(e.postData.contents);
+    
+    // データを追加
+    data.records.forEach(record => {
+      sheet.appendRow(record);
+    });
+    
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: true,
+        message: 'データを保存しました'
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: false,
+        message: error.toString()
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+4. 💾 保存ボタンをクリック
+
+【ステップ3】デプロイ
+1. 「デプロイ」→「新しいデプロイ」をクリック
+2. 歯車アイコン⚙️→「ウェブアプリ」を選択
+3. 説明：「頻尿日記API」など（任意）
+4. 次のユーザーとして実行：「自分」を選択
+5. アクセスできるユーザー：「全員」を選択
+6. 「デプロイ」ボタンをクリック
+7. 「アクセスを承認」→自分のGoogleアカウントを選択
+8. 「詳細」→「（プロジェクト名）に移動」をクリック
+9. 「許可」をクリック
+10. 表示された「ウェブアプリURL」をコピー
+    （https://script.google.com/macros/s/...../exec）
+
+【ステップ4】アプリに設定
+1. コピーしたURLを上の入力欄に貼り付け
+2. 「設定を保存」をクリック
+3. 「接続テスト」で動作確認
+
+これで毎日24時に自動的に保存されます！`;
+
+            alert(instructions);
+        }
+
+        // 接続テスト
+        async function testConnection() {
+            if (!sheetUrl) {
+                alert('先にApps ScriptのウェブアプリURLを設定してください');
+                return;
+            }
+
+            const testData = {
+                records: [
+                    [
+                        new Date().toLocaleDateString('ja-JP'),
+                        new Date().toLocaleTimeString('ja-JP'),
+                        'テスト',
+                        '接続確認',
+                        '',
+                        'このデータは接続テストです'
+                    ]
+                ]
+            };
+
+            try {
+                const response = await fetch(sheetUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                // no-corsモードでは詳細な結果が取得できないため、送信成功とみなす
+                alert('✅ 接続テストを送信しました！\n\nスプレッドシートを確認して、テストデータが追加されているか確認してください。\n\nデータが追加されていれば設定完了です！');
+            } catch (error) {
+                alert('❌ 接続エラーが発生しました。\n\nURLが正しいか確認してください。\n\nエラー: ' + error.message);
+            }
+        }
+
+        // 手動エクスポート
+        async function manualExport() {
+            if (!sheetUrl) {
+                alert('先にApps ScriptのウェブアプリURLを設定してください');
+                return;
+            }
+
+            const result = await exportToSheet();
+            if (result) {
+                alert('✅ 今日のデータをスプレッドシートに保存しました！');
+            }
+        }
+
+        // Googleスプレッドシートへエクスポート
+        async function exportToSheet() {
+            if (!sheetUrl) return false;
+
+            const today = new Date().toDateString();
+            const todayRecords = records.filter(r => 
+                new Date(r.timestamp).toDateString() === today
+            );
+
+            if (todayRecords.length === 0) {
+                console.log('今日の記録がありません');
+                return false;
+            }
+
+            // データを整形
+            const exportData = todayRecords.map(record => {
+                const date = new Date(record.timestamp);
+                const dateStr = date.toLocaleDateString('ja-JP');
+                const timeStr = date.toLocaleTimeString('ja-JP', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                if (record.type === 'intake') {
+                    return [
+                        dateStr, 
+                        timeStr, 
+                        '水分摂取', 
+                        record.drinkType, 
+                        record.amount, 
+                        ''
+                    ];
+                } else {
+                    return [
+                        dateStr, 
+                        timeStr, 
+                        '排尿', 
+                        record.amount, 
+                        '', 
+                        record.note || ''
+                    ];
+                }
+            });
+
+            const payload = {
+                records: exportData
+            };
+
+            try {
+                const response = await fetch(sheetUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                console.log('✅ データを送信しました:', new Date().toLocaleString());
+                
+                // 送信済みフラグを保存
+                const lastExport = new Date().toDateString();
+                localStorage.setItem('lastExport', lastExport);
+                
+                return true;
+            } catch (error) {
+                console.error('送信エラー:', error);
+                alert('❌ データ送信に失敗しました。\n\n接続を確認してください。');
+                return false;
+            }
+        }
+
+        // 24時チェック
+        function checkMidnight() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const lastExport = localStorage.getItem('lastExport');
+            const today = new Date().toDateString();
+            
+            // 24時（0時）になり、まだ今日エクスポートしていない場合
+            if (hours === 0 && minutes === 0 && lastExport !== today) {
+                console.log('🕛 24時になりました。データを自動保存します...');
+                exportToSheet();
+            }
+        }
+
+        // 初期化
+        updateDate();
+        setInterval(updateDate, 60000); // 1分ごとに日付更新
+        setInterval(checkMidnight, 60000); // 1分ごとに24時チェック
+        
+        // ページ読み込み時にシートURL設定を表示
+        if (sheetUrl) {
+            console.log('Googleスプレッドシート連携: 有効');
+        }
+    </script>
+</body>
+</html>
