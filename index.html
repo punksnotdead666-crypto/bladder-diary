@@ -238,21 +238,181 @@
             border-radius: 8px;
             cursor: pointer;
         }
+
+        .night-mode-toggle {
+            background: none;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .night-mode-toggle:hover {
+            background: #667eea;
+            transform: scale(1.1);
+        }
+
+        /* ナイトモード */
+        body.night-mode {
+            background: linear-gradient(135deg, #0a0000 0%, #1a0000 100%);
+        }
+
+        body.night-mode .container {
+            background: #0d0d0d;
+            color: #8b3a3a;
+        }
+
+        body.night-mode h1 {
+            color: #8b3a3a;
+        }
+
+        body.night-mode .date-display {
+            color: #6b2e2e;
+        }
+
+        body.night-mode .tab {
+            color: #6b2e2e;
+            border-bottom-color: #2a2a2a;
+        }
+
+        body.night-mode .tab.active {
+            color: #8b3a3a;
+        }
+
+        body.night-mode .tab.active::after {
+            background: #6b2e2e;
+        }
+
+        body.night-mode label {
+            color: #6b2e2e;
+        }
+
+        body.night-mode select,
+        body.night-mode input {
+            background: #1a1a1a;
+            border-color: #2a2a2a;
+            color: #6b2e2e;
+        }
+
+        body.night-mode .amount-btn {
+            background: #1a1a1a;
+            border-color: #2a2a2a;
+            color: #6b2e2e;
+        }
+
+        body.night-mode .amount-btn:hover {
+            background: #2a2a2a;
+        }
+
+        body.night-mode .amount-btn.selected {
+            background: #4a1515;
+            border-color: #4a1515;
+            color: #000000;
+        }
+
+        body.night-mode .add-btn {
+            background: linear-gradient(135deg, #4a1515 0%, #5a1a1a 100%);
+            color: #000000;
+        }
+
+        body.night-mode .record-item {
+            background: #1a1a1a;
+        }
+
+        body.night-mode .record-time {
+            color: #8b3a3a;
+        }
+
+        body.night-mode .record-details {
+            color: #6b2e2e;
+        }
+
+        body.night-mode .delete-btn {
+            background: #3a1010;
+            color: #000000;
+        }
+
+        body.night-mode .summary {
+            background: linear-gradient(135deg, #1a0505 0%, #2a0a0a 100%);
+        }
+
+        body.night-mode .summary-value {
+            color: #8b3a3a;
+        }
+
+        body.night-mode .summary-label {
+            color: #6b2e2e;
+        }
+
+        body.night-mode .empty-state {
+            color: #4a4a4a;
+        }
+
+        body.night-mode .custom-amount button {
+            background: #4a1515;
+            color: #000000;
+        }
+
+        body.night-mode .night-mode-toggle {
+            border-color: #6b2e2e;
+            color: #6b2e2e;
+        }
+
+        body.night-mode .night-mode-toggle:hover {
+            background: #4a1515;
+        }
+
+        body.night-mode a {
+            color: #6b2e2e;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>💧 頻尿日記</h1>
-        <div class="date-display" id="dateDisplay"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div>
+                <h1>💧 頻尿日記</h1>
+                <div class="date-display" id="dateDisplay"></div>
+            </div>
+            <button class="night-mode-toggle" onclick="toggleNightMode()" id="nightModeBtn">
+                🌙
+            </button>
+        </div>
 
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('intake')">水分摂取</button>
-            <button class="tab" onclick="switchTab('urination')">排尿</button>
+            <button class="tab active" onclick="switchTab('urination')">排尿</button>
+            <button class="tab" onclick="switchTab('intake')">水分摂取</button>
             <button class="tab" onclick="switchTab('history')">記録</button>
         </div>
 
+        <!-- 排尿タブ -->
+        <div id="urination" class="tab-content active">
+            <div class="input-group">
+                <label>量</label>
+                <div class="amount-selector">
+                    <button class="amount-btn" onclick="selectUrinationAmount('チョロチョロ')">チョロチョロ</button>
+                    <button class="amount-btn" onclick="selectUrinationAmount('普通')">普通</button>
+                    <button class="amount-btn" onclick="selectUrinationAmount('大量')">大量</button>
+                </div>
+                <div class="custom-amount">
+                    <input type="text" id="customUrinationAmount" placeholder="その他を入力">
+                    <button onclick="selectCustomUrinationAmount()">設定</button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>メモ（任意）</label>
+                <input type="text" id="urinationNote" placeholder="例：夜間、我慢できなかった等">
+            </div>
+
+            <button class="add-btn" onclick="addUrination()">🚽 排尿を記録</button>
+        </div>
+
         <!-- 水分摂取タブ -->
-        <div id="intake" class="tab-content active">
+        <div id="intake" class="tab-content">
             <div class="input-group">
                 <label>飲み物の種類</label>
                 <select id="drinkType">
@@ -284,29 +444,6 @@
             </div>
 
             <button class="add-btn" onclick="addIntake()">💧 水分摂取を記録</button>
-        </div>
-
-        <!-- 排尿タブ -->
-        <div id="urination" class="tab-content">
-            <div class="input-group">
-                <label>量</label>
-                <div class="amount-selector">
-                    <button class="amount-btn" onclick="selectUrinationAmount('チョロチョロ')">チョロチョロ</button>
-                    <button class="amount-btn" onclick="selectUrinationAmount('普通')">普通</button>
-                    <button class="amount-btn" onclick="selectUrinationAmount('大量')">大量</button>
-                </div>
-                <div class="custom-amount">
-                    <input type="text" id="customUrinationAmount" placeholder="その他を入力">
-                    <button onclick="selectCustomUrinationAmount()">設定</button>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label>メモ（任意）</label>
-                <input type="text" id="urinationNote" placeholder="例：夜間、我慢できなかった等">
-            </div>
-
-            <button class="add-btn" onclick="addUrination()">🚽 排尿を記録</button>
         </div>
 
         <!-- 記録タブ -->
@@ -760,6 +897,42 @@ function doPost(e) {
         if (sheetUrl) {
             console.log('Googleスプレッドシート連携: 有効');
         }
+
+        // ナイトモード関連
+        let nightModeManual = localStorage.getItem('nightModeManual') === 'true';
+        let isNightMode = false;
+
+        function toggleNightMode() {
+            nightModeManual = !nightModeManual;
+            localStorage.setItem('nightModeManual', nightModeManual);
+            applyNightMode();
+        }
+
+        function checkAutoNightMode() {
+            const hour = new Date().getHours();
+            // 23時〜7時は自動ナイトモード（手動設定が優先）
+            return hour >= 23 || hour < 7;
+        }
+
+        function applyNightMode() {
+            const shouldBeNight = nightModeManual || checkAutoNightMode();
+            
+            if (shouldBeNight !== isNightMode) {
+                isNightMode = shouldBeNight;
+                
+                if (isNightMode) {
+                    document.body.classList.add('night-mode');
+                    document.getElementById('nightModeBtn').textContent = '☀️';
+                } else {
+                    document.body.classList.remove('night-mode');
+                    document.getElementById('nightModeBtn').textContent = '🌙';
+                }
+            }
+        }
+
+        // 初回適用と定期チェック
+        applyNightMode();
+        setInterval(applyNightMode, 60000); // 1分ごとにチェック
     </script>
 </body>
 </html>
