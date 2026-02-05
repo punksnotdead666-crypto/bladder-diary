@@ -255,118 +255,118 @@
             transform: scale(1.1);
         }
 
-        /* ナイトモード */
         body.night-mode {
-            background: linear-gradient(135deg, #0a0000 0%, #1a0000 100%);
+            background: linear-gradient(135deg, #000000 0%, #0a0000 100%);
+            filter: brightness(0.6);
         }
 
         body.night-mode .container {
-            background: #0d0d0d;
-            color: #8b3a3a;
+            background: #050505;
+            color: #5a2020;
         }
 
         body.night-mode h1 {
-            color: #8b3a3a;
+            color: #5a2020;
         }
 
         body.night-mode .date-display {
-            color: #6b2e2e;
+            color: #4a1818;
         }
 
         body.night-mode .tab {
-            color: #6b2e2e;
-            border-bottom-color: #2a2a2a;
+            color: #4a1818;
+            border-bottom-color: #1a1a1a;
         }
 
         body.night-mode .tab.active {
-            color: #8b3a3a;
+            color: #5a2020;
         }
 
         body.night-mode .tab.active::after {
-            background: #6b2e2e;
+            background: #4a1818;
         }
 
         body.night-mode label {
-            color: #6b2e2e;
+            color: #4a1818;
         }
 
         body.night-mode select,
         body.night-mode input {
-            background: #1a1a1a;
-            border-color: #2a2a2a;
-            color: #6b2e2e;
+            background: #0a0a0a;
+            border-color: #1a1a1a;
+            color: #4a1818;
         }
 
         body.night-mode .amount-btn {
-            background: #1a1a1a;
-            border-color: #2a2a2a;
-            color: #6b2e2e;
+            background: #0a0a0a;
+            border-color: #1a1a1a;
+            color: #4a1818;
         }
 
         body.night-mode .amount-btn:hover {
-            background: #2a2a2a;
+            background: #1a1a1a;
         }
 
         body.night-mode .amount-btn.selected {
-            background: #4a1515;
-            border-color: #4a1515;
+            background: #2a0a0a;
+            border-color: #2a0a0a;
             color: #000000;
         }
 
         body.night-mode .add-btn {
-            background: linear-gradient(135deg, #4a1515 0%, #5a1a1a 100%);
+            background: linear-gradient(135deg, #2a0a0a 0%, #3a0f0f 100%);
             color: #000000;
         }
 
         body.night-mode .record-item {
-            background: #1a1a1a;
+            background: #0a0a0a;
         }
 
         body.night-mode .record-time {
-            color: #8b3a3a;
+            color: #5a2020;
         }
 
         body.night-mode .record-details {
-            color: #6b2e2e;
+            color: #4a1818;
         }
 
         body.night-mode .delete-btn {
-            background: #3a1010;
+            background: #2a0808;
             color: #000000;
         }
 
         body.night-mode .summary {
-            background: linear-gradient(135deg, #1a0505 0%, #2a0a0a 100%);
+            background: linear-gradient(135deg, #0a0202 0%, #150505 100%);
         }
 
         body.night-mode .summary-value {
-            color: #8b3a3a;
+            color: #5a2020;
         }
 
         body.night-mode .summary-label {
-            color: #6b2e2e;
+            color: #4a1818;
         }
 
         body.night-mode .empty-state {
-            color: #4a4a4a;
+            color: #3a3a3a;
         }
 
         body.night-mode .custom-amount button {
-            background: #4a1515;
+            background: #2a0a0a;
             color: #000000;
         }
 
         body.night-mode .night-mode-toggle {
-            border-color: #6b2e2e;
-            color: #6b2e2e;
+            border-color: #4a1818;
+            color: #4a1818;
         }
 
         body.night-mode .night-mode-toggle:hover {
-            background: #4a1515;
+            background: #2a0a0a;
         }
 
         body.night-mode a {
-            color: #6b2e2e;
+            color: #4a1818;
         }
     </style>
 </head>
@@ -462,14 +462,15 @@
             </div>
 
             <div class="input-group">
-                <label>📊 Googleスプレッドシート自動保存設定</label>
+                <label>📊 Googleスプレッドシート設定</label>
                 <input type="text" id="sheetUrl" placeholder="Apps ScriptのウェブアプリURLを入力" style="margin-bottom: 10px;">
                 <button class="add-btn" onclick="saveSheetUrl()" style="margin-top: 0; padding: 12px;">設定を保存</button>
                 <div style="font-size: 12px; color: #666; margin-top: 10px; line-height: 1.6;">
-                    💡 毎日24時に自動的にスプレッドシートへ保存されます<br>
+                    💡 記録する度にリアルタイムでスプレッドシートに保存されます<br>
+                    🕛 毎日24時に記録タブの内容はリセットされます<br>
                     ⚙️ <a href="#" onclick="showSheetSetup(); return false;" style="color: #667eea;">設定手順を見る</a> | 
                     <a href="#" onclick="testConnection(); return false;" style="color: #667eea;">接続テスト</a> |
-                    <a href="#" onclick="manualExport(); return false;" style="color: #667eea;">今すぐ保存</a>
+                    <a href="#" onclick="manualExport(); return false;" style="color: #667eea;">今すぐ全件保存</a>
                 </div>
             </div>
 
@@ -535,7 +536,7 @@
         }
 
         // 水分摂取記録
-        function addIntake() {
+        async function addIntake() {
             const drinkType = document.getElementById('drinkType').value;
             
             if (!selectedAmount) {
@@ -553,6 +554,11 @@
             records.push(record);
             saveRecords();
             
+            // スプレッドシートにリアルタイム保存
+            if (sheetUrl) {
+                await saveRecordToSheet(record);
+            }
+            
             // リセット
             selectedAmount = null;
             document.querySelectorAll('#intake .amount-btn').forEach(btn => btn.classList.remove('selected'));
@@ -562,7 +568,7 @@
         }
 
         // 排尿記録
-        function addUrination() {
+        async function addUrination() {
             if (!selectedUrinationAmount) {
                 alert('量を選択してください');
                 return;
@@ -579,6 +585,11 @@
 
             records.push(record);
             saveRecords();
+            
+            // スプレッドシートにリアルタイム保存
+            if (sheetUrl) {
+                await saveRecordToSheet(record);
+            }
             
             // リセット
             selectedUrinationAmount = null;
@@ -682,7 +693,7 @@
 
         // スプレッドシート設定手順を表示
         function showSheetSetup() {
-            const instructions = `📊 Googleスプレッドシート自動保存設定手順
+            const instructions = `📊 Googleスプレッドシート設定手順
 
 【ステップ1】Googleスプレッドシートを作成
 1. 新しいGoogleスプレッドシートを作成
@@ -746,7 +757,7 @@ function doPost(e) {
 2. 「設定を保存」をクリック
 3. 「接続テスト」で動作確認
 
-これで毎日24時に自動的に保存されます！`;
+これで記録する度に自動的にスプレッドシートに保存されます！`;
 
             alert(instructions);
         }
@@ -795,27 +806,17 @@ function doPost(e) {
                 return;
             }
 
-            const result = await exportToSheet();
-            if (result) {
-                alert('✅ 今日のデータをスプレッドシートに保存しました！');
-            }
-        }
-
-        // Googleスプレッドシートへエクスポート
-        async function exportToSheet() {
-            if (!sheetUrl) return false;
-
             const today = new Date().toDateString();
             const todayRecords = records.filter(r => 
                 new Date(r.timestamp).toDateString() === today
             );
 
             if (todayRecords.length === 0) {
-                console.log('今日の記録がありません');
-                return false;
+                alert('今日の記録がありません');
+                return;
             }
 
-            // データを整形
+            // 全記録をまとめて送信
             const exportData = todayRecords.map(record => {
                 const date = new Date(record.timestamp);
                 const dateStr = date.toLocaleDateString('ja-JP');
@@ -825,32 +826,16 @@ function doPost(e) {
                 });
                 
                 if (record.type === 'intake') {
-                    return [
-                        dateStr, 
-                        timeStr, 
-                        '水分摂取', 
-                        record.drinkType, 
-                        record.amount, 
-                        ''
-                    ];
+                    return [dateStr, timeStr, '水分摂取', record.drinkType, record.amount, ''];
                 } else {
-                    return [
-                        dateStr, 
-                        timeStr, 
-                        '排尿', 
-                        record.amount, 
-                        '', 
-                        record.note || ''
-                    ];
+                    return [dateStr, timeStr, '排尿', record.amount, '', record.note || ''];
                 }
             });
 
-            const payload = {
-                records: exportData
-            };
+            const payload = { records: exportData };
 
             try {
-                const response = await fetch(sheetUrl, {
+                await fetch(sheetUrl, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: {
@@ -859,32 +844,86 @@ function doPost(e) {
                     body: JSON.stringify(payload)
                 });
 
-                console.log('✅ データを送信しました:', new Date().toLocaleString());
-                
-                // 送信済みフラグを保存
-                const lastExport = new Date().toDateString();
-                localStorage.setItem('lastExport', lastExport);
-                
+                alert('✅ 今日のデータをスプレッドシートに保存しました！');
+            } catch (error) {
+                alert('❌ データ送信に失敗しました。\n\n接続を確認してください。');
+            }
+        }
+
+        // 個別レコードをスプレッドシートに保存
+        async function saveRecordToSheet(record) {
+            if (!sheetUrl) return false;
+
+            const date = new Date(record.timestamp);
+            const dateStr = date.toLocaleDateString('ja-JP');
+            const timeStr = date.toLocaleTimeString('ja-JP', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            let rowData;
+            if (record.type === 'intake') {
+                rowData = [
+                    dateStr, 
+                    timeStr, 
+                    '水分摂取', 
+                    record.drinkType, 
+                    record.amount, 
+                    ''
+                ];
+            } else {
+                rowData = [
+                    dateStr, 
+                    timeStr, 
+                    '排尿', 
+                    record.amount, 
+                    '', 
+                    record.note || ''
+                ];
+            }
+
+            const payload = {
+                records: [rowData]
+            };
+
+            try {
+                await fetch(sheetUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                console.log('✅ スプレッドシートに保存しました:', timeStr);
                 return true;
             } catch (error) {
-                console.error('送信エラー:', error);
-                alert('❌ データ送信に失敗しました。\n\n接続を確認してください。');
+                console.error('保存エラー:', error);
                 return false;
             }
         }
 
-        // 24時チェック
+        // 24時チェック（記録のリセット）
         function checkMidnight() {
             const now = new Date();
             const hours = now.getHours();
             const minutes = now.getMinutes();
-            const lastExport = localStorage.getItem('lastExport');
-            const today = new Date().toDateString();
+            const lastResetDate = localStorage.getItem('lastResetDate');
+            const today = now.toDateString();
             
-            // 24時（0時）になり、まだ今日エクスポートしていない場合
-            if (hours === 0 && minutes === 0 && lastExport !== today) {
-                console.log('🕛 24時になりました。データを自動保存します...');
-                exportToSheet();
+            // 24時（0時）になり、まだ今日リセットしていない場合
+            if (hours === 0 && minutes === 0 && lastResetDate !== today) {
+                console.log('🕛 24時になりました。記録をリセットします...');
+                
+                // 記録を全削除
+                records = [];
+                saveRecords();
+                
+                // リセット日を記録
+                localStorage.setItem('lastResetDate', today);
+                
+                console.log('✅ 記録をリセットしました');
             }
         }
 
@@ -923,6 +962,18 @@ function doPost(e) {
                 if (isNightMode) {
                     document.body.classList.add('night-mode');
                     document.getElementById('nightModeBtn').textContent = '☀️';
+                    
+                    // 画面輝度を下げる試み（ブラウザ制限あり）
+                    // ユーザーに輝度を下げるよう促す
+                    if (!localStorage.getItem('brightnessWarningShown')) {
+                        setTimeout(() => {
+                            if (confirm('ナイトモードが有効です。\n\nさらに目を保護するため、スマホの輝度を最低にすることをおすすめします。\n\n設定画面を開きますか？')) {
+                                // Androidの設定を開く試み
+                                window.location.href = 'intent://settings/#Intent;scheme=android-app;package=com.android.settings;end';
+                            }
+                            localStorage.setItem('brightnessWarningShown', 'true');
+                        }, 1000);
+                    }
                 } else {
                     document.body.classList.remove('night-mode');
                     document.getElementById('nightModeBtn').textContent = '🌙';
